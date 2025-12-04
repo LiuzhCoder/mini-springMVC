@@ -1,5 +1,6 @@
 package com.lzh.annotation;
 
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -8,7 +9,8 @@ import java.lang.annotation.Target;
 /**
  * @author Lzh
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE,ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MyController {
+public @interface MyRequestMapping {
+    String value();
 }
