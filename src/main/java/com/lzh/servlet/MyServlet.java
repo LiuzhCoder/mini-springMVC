@@ -1,5 +1,6 @@
 package com.lzh.servlet;
 
+import com.lzh.annotation.MyRequestParam;
 import com.lzh.listener.HandlerMappingListener;
 
 import javax.servlet.*;
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Map;
 
 public class MyServlet extends HttpServlet {
@@ -25,10 +27,37 @@ public class MyServlet extends HttpServlet {
         Method method = controllerMap.get(uri);
         //判断参数的数量
         int parameterCount = method.getParameterCount();
+        //参数列表
+        Object[] args = new Object[parameterCount];
         if (parameterCount==0){
             //无参
         }else{
-            //多个参数
+            Parameter[] parameters = method.getParameters();
+            for (int i = 0; i < parameters.length; i++) {
+                Parameter parameter = parameters[i];
+                Class<?> type = parameter.getType();
+                // 1. 特殊参数：req / resp
+                if (type == HttpServletRequest.class) {
+                    args[i] = req;
+                    continue;
+                }
+                if (type == HttpServletResponse.class) {
+                    args[i] = resp;
+                    continue;
+                }
+                String parameterName;
+                if (parameter.isAnnotationPresent(MyRequestParam.class)){
+                    MyRequestParam annotation = parameter.getAnnotation(MyRequestParam.class);
+                    parameterName = annotation.value();
+                }else{
+                    parameterName = parameter.getName();
+                }
+                //通过 request 获取参数
+                String value = req.getParameter(parameterName);
+                // 这里只做最简单的：String 直接用
+                // 如果你以后要支持 int、long 等，可以在这里加类型转换
+                args[i] = value;
+            }
         }
     }
 }
