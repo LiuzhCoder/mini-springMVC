@@ -22,6 +22,7 @@ public class HandlerMappingListener  implements ServletContextListener {
     private final List<String> classNames = new ArrayList<>();
 
     public final static Map<String, Method> CONTROLLER_MAP = new HashMap<>();
+    public final static Map<String, Object> CONTROLLER_BEANS = new HashMap<>();
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         //应用启动时加载数据
@@ -83,21 +84,22 @@ public class HandlerMappingListener  implements ServletContextListener {
             Class<?> clazz = Class.forName(fullClassName);
             // 假设你自己定义了一个 MyController 注解
             if (clazz.isAnnotationPresent(MyController.class)) {
+                Object controller = clazz.newInstance();
                 Method[] declaredMethods = clazz.getDeclaredMethods();
                 String basePath = "";
                 if (clazz.isAnnotationPresent(MyRequestMapping.class)){
-                    String value = clazz.getAnnotation(MyRequestMapping.class).value();
-                    basePath = value;
+                    basePath = clazz.getAnnotation(MyRequestMapping.class).value();
                 }
                 for (Method declaredMethod : declaredMethods) {
                     if (declaredMethod.isAnnotationPresent(MyRequestMapping.class)){
                         MyRequestMapping annotation = declaredMethod.getAnnotation(MyRequestMapping.class);
-                        CONTROLLER_MAP.put(basePath+annotation,declaredMethod);
+                        CONTROLLER_MAP.put(basePath+annotation.value(),declaredMethod);
+                        CONTROLLER_BEANS.put(basePath+annotation.value(),controller);
                     }
                 }
 
             }
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
     }

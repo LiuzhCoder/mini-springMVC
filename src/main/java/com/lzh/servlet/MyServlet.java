@@ -20,6 +20,7 @@ public class MyServlet extends HttpServlet {
         String uri = req.getRequestURI();
         //判断uri是否存在对应的方法是否存在
         Map<String, Method> controllerMap = HandlerMappingListener.CONTROLLER_MAP;
+        Map<String,Object> controllerBeans = HandlerMappingListener.CONTROLLER_BEANS;
         if (!controllerMap.containsKey(uri)) {
             System.out.println(404);
             return;
@@ -59,5 +60,20 @@ public class MyServlet extends HttpServlet {
                 args[i] = value;
             }
         }
+
+        Object o = controllerBeans.get(uri);
+        try {
+            Object invoke = method.invoke(o, args);
+            //判断是不是 String
+            if (invoke instanceof String){
+                //如果是，则去找对应的视图
+                RequestDispatcher requestDispatcher = req.getRequestDispatcher((String) invoke);
+                requestDispatcher.forward(req,resp);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }
