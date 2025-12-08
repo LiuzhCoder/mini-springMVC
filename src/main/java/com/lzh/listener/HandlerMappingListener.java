@@ -7,6 +7,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -84,7 +85,7 @@ public class HandlerMappingListener  implements ServletContextListener {
             Class<?> clazz = Class.forName(fullClassName);
             // 假设你自己定义了一个 MyController 注解
             if (clazz.isAnnotationPresent(MyController.class)) {
-                Object controller = clazz.newInstance();
+                Object controller = clazz.getDeclaredConstructor().newInstance();
                 Method[] declaredMethods = clazz.getDeclaredMethods();
                 String basePath = "";
                 if (clazz.isAnnotationPresent(MyRequestMapping.class)){
@@ -99,7 +100,7 @@ public class HandlerMappingListener  implements ServletContextListener {
                 }
 
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }
