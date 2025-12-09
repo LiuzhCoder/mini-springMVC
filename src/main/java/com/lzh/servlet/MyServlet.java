@@ -16,8 +16,14 @@ public class MyServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        //不包含协议、主机、接口
+        //不包含主机
         String uri = req.getRequestURI();
+        //如果项目部署在 webapps 中，contextPath 就是它的文件夹名称
+        String contextPath = req.getContextPath();
+        // 处理掉 contextPath
+        uri = uri.replace(contextPath, "");
+        // 把 "//" 变成 "/"
+        String url = uri.replaceAll("/+", "/");
         //判断uri是否存在对应的方法是否存在
         Map<String, Method> controllerMap = HandlerMappingListener.CONTROLLER_MAP;
         Map<String,Object> controllerBeans = HandlerMappingListener.CONTROLLER_BEANS;
